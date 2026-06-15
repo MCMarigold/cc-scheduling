@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Care Shift Timeline — June 22 – July 5, 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #F7F5F0;
+    color: #2C2A27;
+    padding: 2rem 1.5rem 3rem;
+    min-height: 100vh;
+  }
+
+  .page { max-width: 1000px; margin: 0 auto; }
+
+  .header {
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #D39715;
+    padding-bottom: 1rem;
+  }
+  .header-eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; color: #D39715; margin-bottom: 6px;
+  }
+  .header h1 { font-size: 22px; font-weight: 600; color: #2C2A27; margin-bottom: 4px; }
+  .header-sub { font-size: 13px; color: #6B6860; }
+
+  /* Week toggle */
+  .week-toggle {
+    display: flex; gap: 0; margin-bottom: 1.5rem;
+    border: 1px solid #D0CBB0; border-radius: 8px; overflow: hidden;
+    width: fit-content;
+  }
+  .week-btn {
+    padding: 8px 20px; font-size: 12.5px; font-weight: 600;
+    background: #fff; color: #6B6860; border: none; cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .week-btn:first-child { border-right: 1px solid #D0CBB0; }
+  .week-btn.active { background: #D39715; color: #fff; }
+  .week-btn:hover:not(.active) { background: #F0EBD8; color: #2C2A27; }
+
+  /* Legend */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 8px 16px;
+    margin-bottom: 1.25rem; align-items: center;
+  }
+  .legend-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: #6B6860; margin-right: 4px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #4A4844; }
+  .legend-swatch { width: 24px; height: 12px; border-radius: 3px; }
+
+  /* Timeline grid */
+  .week-view { display: none; }
+  .week-view.active { display: block; }
+
+  .timeline-wrap {
+    background: #fff;
+    border: 1px solid #E0DBD0;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  /* Hour header */
+  .hour-header {
+    display: grid;
+    border-bottom: 1px solid #E0DBD0;
+    background: #F7F5F0;
+  }
+  .hour-header-inner {
+    display: flex;
+    padding: 6px 0;
+  }
+  .agent-label-spacer { flex-shrink: 0; }
+  .hour-labels { flex: 1; position: relative; height: 20px; }
+  .hour-tick {
+    position: absolute;
+    font-size: 9.5px;
+    font-weight: 600;
+    color: #9A9690;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  /* Day rows */
+  .day-row {
+    border-bottom: 1px solid #F0EDE6;
+  }
+  .day-row:last-child { border-bottom: none; }
+  .day-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 14px 4px;
+    border-bottom: 1px solid #F0EDE6;
+    background: #FDFCFA;
+  }
+  .day-name {
+    font-size: 11.5px; font-weight: 600; color: #4A4844;
+    min-width: 90px;
+  }
+  .day-closed {
+    font-size: 11px; color: #9A9690; font-style: italic;
+    margin-left: 8px;
+  }
+  .day-closed-banner {
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #9A9690;
+    font-style: italic;
+    background: #F7F5F0;
+  }
+
+  /* Agent bar rows */
+  .agent-bars { padding: 6px 0 6px; }
+  .agent-row {
+    display: flex;
+    align-items: center;
+    padding: 3px 0;
+    position: relative;
+  }
+  .agent-name {
+    font-size: 11px; font-weight: 500; color: #6B6860;
+    flex-shrink: 0;
+    text-align: right;
+    padding-right: 10px;
+  }
+  .bar-track {
+    flex: 1;
+    position: relative;
+    height: 22px;
+    background: #F7F5F0;
+    border-radius: 3px;
+    margin-right: 14px;
+  }
+  /* Vertical hour grid lines on track */
+  .bar-track::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: repeating-linear-gradient(
+      to right,
+      #E8E4DA 0px, #E8E4DA 1px,
+      transparent 1px, transparent calc(100% / 19)
+    );
+    border-radius: 3px;
+    pointer-events: none;
+  }
+  .shift-bar {
+    position: absolute;
+    top: 2px; bottom: 2px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9.5px;
+    font-weight: 600;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  /* Overlap indicator */
+  .overlap-zone {
+    position: absolute;
+    top: 0; bottom: 0;
+    background: rgba(211, 151, 21, 0.12);
+    border-left: 1.5px dashed #D39715;
+    border-right: 1.5px dashed #D39715;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Agent colors */
+  .c-maggie  { background: #DBEAF7; color: #0D4A7A; }
+  .c-sara    { background: #DAF0E3; color: #1A5C35; }
+  .c-alicia  { background: #EAE8FC; color: #3A2F9E; }
+  .c-megan   { background: #FEF0D6; color: #7A4A08; }
+  .c-monique { background: #EDECEA; color: #4A4844; }
+  .c-deb     { background: #FFE8CC; color: #7A3800; }
+
+  /* Coverage count bar */
+  .coverage-row {
+    display: flex;
+    align-items: center;
+    padding: 4px 0 2px;
+    border-top: 1px dashed #E0DBD0;
+    margin-top: 2px;
+  }
+  .coverage-label {
+    font-size: 10px; font-weight: 600; color: #9A9690;
+    flex-shrink: 0; text-align: right; padding-right: 10px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .coverage-track {
+    flex: 1; position: relative; height: 14px; margin-right: 14px;
+  }
+  .coverage-seg {
+    position: absolute;
+    top: 0; bottom: 0;
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700;
+  }
+  /* Coverage colors by count */
+  .cov-1 { background: #FEF0D6; color: #7A4A08; }
+  .cov-2 { background: #DAF0E3; color: #1A5C35; }
+  .cov-3 { background: #DBEAF7; color: #0D4A7A; }
+  .cov-4 { background: #3A2F9E; color: #fff; }
+
+  /* Notes */
+  .notes-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-top: 1.25rem;
+  }
+  .note-card {
+    border-radius: 8px; padding: 11px 13px;
+    font-size: 12px; line-height: 1.6;
+  }
+  .note-card strong { font-weight: 600; display: block; margin-bottom: 2px; }
+  .note-warn  { background: #FEF7E6; border: 1px solid #F5D98A; color: #7A4A08; }
+  .note-good  { background: #E8F6ED; border: 1px solid #86D0A3; color: #1A5C35; }
+  .note-info  { background: #E8F0FB; border: 1px solid #9DC4F0; color: #0D4A7A; }
+
+  .footer {
+    margin-top: 2rem; font-size: 11px; color: #9A9690;
+    border-top: 1px solid #E8E4DA; padding-top: 12px;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px;
+  }
+
+  @media print {
+    body { background: #fff; padding: 1rem; }
+    .week-toggle { display: none; }
+    .week-view { display: block !important; page-break-after: always; }
+    .week-view:last-child { page-break-after: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header-eyebrow">Marigold Home Inspections — Client Care</div>
+    <h1>Shift Timeline — June 22 – July 5, 2026</h1>
+    <div class="header-sub">Deb working Mon–Tue 6/22–23, out from Wed 6/24 (surgery) &nbsp;·&nbsp; Closed Fri July 3 (8 hrs holiday pay) & Sat July 4 (no holiday pay) &nbsp;·&nbsp; Maggie partial vacation June 29–July 2</div>
+  </div>
+
+  <div class="week-toggle">
+    <button class="week-btn active" onclick="showWeek(1)">Week 1 — June 22–28</button>
+    <button class="week-btn" onclick="showWeek(2)">Week 2 — June 29 – July 5</button>
+  </div>
+
+  <div class="legend">
+    <span class="legend-label">Key</span>
+    <div class="legend-item"><div class="legend-swatch" style="background:#DBEAF7;"></div>Maggie</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#DAF0E3;"></div>Sara</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#EAE8FC;"></div>Alicia</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#FEF0D6;"></div>Megan</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#EDECEA;"></div>Monique</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#FFE8CC;"></div>Deb</div>
+    <div class="legend-item" style="margin-left:8px;">
+      <div style="display:flex;align-items:center;gap:4px;">
+        <div style="width:14px;height:12px;background:#FEF0D6;border-radius:2px;"></div><span style="font-size:11px;color:#9A9690;">1 agent</span>
+        <div style="width:14px;height:12px;background:#DAF0E3;border-radius:2px;margin-left:4px;"></div><span style="font-size:11px;color:#9A9690;">2</span>
+        <div style="width:14px;height:12px;background:#DBEAF7;border-radius:2px;margin-left:4px;"></div><span style="font-size:11px;color:#9A9690;">3</span>
+        <div style="width:14px;height:12px;background:#3A2F9E;border-radius:2px;margin-left:4px;"></div><span style="font-size:11px;color:#9A9690;">4+</span>
+        <span style="font-size:11px;color:#9A9690;margin-left:4px;">= coverage count</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEEK 1 -->
+  <div class="week-view active" id="week1">
+    <div class="timeline-wrap" id="timeline1"></div>
+
+    <div class="notes-grid">
+      <div class="note-card note-good">
+        <strong>Mon–Tue 6/22–23 — Deb present</strong>
+        Full team minus Sara (Tue–Thu off). Strong morning coverage with Maggie, Deb, and Megan 8a–12p before Alicia joins at 11am.
+      </div>
+      <div class="note-card note-warn">
+        <strong>Wed 6/24 onward — Deb out</strong>
+        Surgery day. Wed–Fri the team runs without Deb. Maggie + Megan carry the morning; Alicia solo from 3pm–7pm.
+      </div>
+      <div class="note-card note-info">
+        <strong>Tue–Thu 3–7pm — single coverage</strong>
+        Alicia is the only daytime agent in the afternoon window. Monique picks up at 6pm but can't resolve complex issues during that overlap hour.
+      </div>
+      <div class="note-card note-good">
+        <strong>Weekend — Sara covers</strong>
+        Sara 9a–7p Sat/Sun with Monique 6p–2a gives solid coverage across both weekend days.
+      </div>
+    </div>
+  </div>
+
+  <!-- WEEK 2 -->
+  <div class="week-view" id="week2">
+    <div class="timeline-wrap" id="timeline2"></div>
+
+    <div class="notes-grid">
+      <div class="note-card note-good">
+        <strong>Mon 6/29 — strong without Maggie</strong>
+        Sara 8a–6p + Megan 8a–12p + Alicia 11a–7p covers the full day. High-volume Monday — heads up to Sara on 8–11am window.
+      </div>
+      <div class="note-card note-good">
+        <strong>Tue 6/30 & Wed 7/1 — triple morning coverage</strong>
+        Maggie 7–11a + Sara 8a–2p + Megan 8a–12p. Best-covered mornings of the week. Sara and Alicia carry the afternoon.
+      </div>
+      <div class="note-card note-warn">
+        <strong>Thu 7/2 — lightest day</strong>
+        Maggie off at 11am, no Sara. Alicia solo noon–7pm. Worth a check-in beforehand given her answer rate pattern in that window.
+      </div>
+      <div class="note-card note-info">
+        <strong>Fri 7/3 & Sat 7/4 — closed both days</strong>
+        July 3 carries 8 hrs holiday pay for all staff. July 4 is also closed but with no additional holiday pay. Sun 7/5 Sara + Monique evening provides normal weekend close.
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Marigold Home Inspections — Client Care &nbsp;·&nbsp; Prepared by Maggie Cox</span>
+    <span>June 2026</span>
+  </div>
+
+</div>
+
+<script>
+// Timeline config
+// Hours shown: 6am (6) to 3am next day (27) = 21 hours span
+const START_HOUR = 6;
+const END_HOUR = 27; // 3am = hour 27
+const TOTAL_HOURS = END_HOUR - START_HOUR; // 21
+
+const AGENT_NAME_WIDTH = 72; // px
+
+const AGENTS = ['Maggie','Sara','Alicia','Megan','Monique','Deb'];
+
+// Agent colors
+const COLORS = {
+  Maggie:  { bg: '#DBEAF7', fg: '#0D4A7A' },
+  Sara:    { bg: '#DAF0E3', fg: '#1A5C35' },
+  Alicia:  { bg: '#EAE8FC', fg: '#3A2F9E' },
+  Megan:   { bg: '#FEF0D6', fg: '#7A4A08' },
+  Monique: { bg: '#EDECEA', fg: '#4A4844' },
+  Deb:     { bg: '#FFE8CC', fg: '#7A3800' },
+};
+
+// Schedule: [startHour, endHour] or null = off, 'closed' = business closed
+// Hours as decimals, e.g. 7 = 7am, 14 = 2pm, 26 = 2am next day
+const WEEK1 = [
+  { date: 'Mon 6/22', shifts: { Maggie:[7,15], Sara:[8,18], Alicia:[11,19], Megan:[8,12], Monique:[18,26], Deb:[9,17] } },
+  { date: 'Tue 6/23', shifts: { Maggie:[7,15], Sara:null,   Alicia:[11,19], Megan:[8,12], Monique:[18,26], Deb:[9,17] } },
+  { date: 'Wed 6/24', shifts: { Maggie:[7,15], Sara:null,   Alicia:[11,19], Megan:[8,12], Monique:[18,26], Deb:null   } },
+  { date: 'Thu 6/25', shifts: { Maggie:[7,15], Sara:null,   Alicia:[11,19], Megan:[8,12], Monique:[18,26], Deb:null   } },
+  { date: 'Fri 6/26', shifts: { Maggie:[7,15], Sara:[8,18], Alicia:[11,19], Megan:[8,12], Monique:null,    Deb:null   } },
+  { date: 'Sat 6/27', shifts: { Maggie:null,   Sara:[9,19], Alicia:null,    Megan:null,   Monique:null,    Deb:null   } },
+  { date: 'Sun 6/28', shifts: { Maggie:null,   Sara:[9,19], Alicia:null,    Megan:null,   Monique:[18,26], Deb:null   } },
+];
+
+const WEEK2 = [
+  { date: 'Mon 6/29', shifts: { Maggie:null,    Sara:[8,18],  Alicia:[11,19], Megan:[7,11], Monique:[18,26], Deb:null } },
+  { date: 'Tue 6/30', shifts: { Maggie:[7,11],  Sara:[8,14],  Alicia:[11,19], Megan:[8,12], Monique:[18,26], Deb:null } },
+  { date: 'Wed 7/1',  shifts: { Maggie:[7,11],  Sara:[8,14],  Alicia:[11,19], Megan:[8,12], Monique:[18,26], Deb:null } },
+  { date: 'Thu 7/2',  shifts: { Maggie:[7,11],  Sara:null,    Alicia:[11,19], Megan:[8,12], Monique:[18,26], Deb:null } },
+  { date: 'Fri 7/3',  closed: true },
+  { date: 'Sat 7/4',  closed: true, noHoliday: true },
+  { date: 'Sun 7/5',  shifts: { Maggie:null,    Sara:[9,19],  Alicia:null,    Megan:null,   Monique:[18,26], Deb:null } },
+];
+
+function pct(hour) {
+  return ((hour - START_HOUR) / TOTAL_HOURS) * 100;
+}
+
+function fmtHour(h) {
+  const h24 = h % 24;
+  if (h24 === 0) return '12a';
+  if (h24 < 12) return h24 + 'a';
+  if (h24 === 12) return '12p';
+  return (h24 - 12) + 'p';
+}
+
+function buildCoverageSegments(dayShifts) {
+  // Count agents on at each half-hour slot
+  const slots = [];
+  for (let h = START_HOUR; h < END_HOUR; h += 0.5) {
+    let count = 0;
+    for (const agent of AGENTS) {
+      const s = dayShifts[agent];
+      if (s && h >= s[0] && h < s[1]) count++;
+    }
+    slots.push({ h, count });
+  }
+  // Merge consecutive same-count slots
+  const segs = [];
+  let cur = null;
+  for (const slot of slots) {
+    if (!cur || cur.count !== slot.count) {
+      if (cur) segs.push(cur);
+      cur = { start: slot.h, end: slot.h + 0.5, count: slot.count };
+    } else {
+      cur.end += 0.5;
+    }
+  }
+  if (cur) segs.push(cur);
+  return segs.filter(s => s.count > 0);
+}
+
+function covColor(n) {
+  if (n === 1) return { bg: '#FEF0D6', fg: '#7A4A08' };
+  if (n === 2) return { bg: '#DAF0E3', fg: '#1A5C35' };
+  if (n === 3) return { bg: '#DBEAF7', fg: '#0D4A7A' };
+  return { bg: '#3A2F9E', fg: '#fff' };
+}
+
+function buildTimeline(containerId, weekData) {
+  const container = document.getElementById(containerId);
+
+  // Hour header
+  const headerDiv = document.createElement('div');
+  headerDiv.style.cssText = 'display:flex;align-items:center;padding:6px 14px 6px 0;border-bottom:1px solid #E0DBD0;background:#F7F5F0;';
+
+  const spacer = document.createElement('div');
+  spacer.style.cssText = `width:${AGENT_NAME_WIDTH + 14}px;flex-shrink:0;`;
+  headerDiv.appendChild(spacer);
+
+  const hourTrack = document.createElement('div');
+  hourTrack.style.cssText = 'flex:1;position:relative;height:20px;margin-right:14px;';
+
+  // Show every 2 hours
+  for (let h = START_HOUR; h <= END_HOUR; h += 2) {
+    const tick = document.createElement('div');
+    tick.style.cssText = `position:absolute;font-size:9.5px;font-weight:600;color:#9A9690;left:${pct(h)}%;transform:translateX(-50%);white-space:nowrap;top:4px;`;
+    tick.textContent = fmtHour(h);
+    hourTrack.appendChild(tick);
+  }
+  headerDiv.appendChild(hourTrack);
+  container.appendChild(headerDiv);
+
+  // Day rows
+  for (const day of weekData) {
+    const dayDiv = document.createElement('div');
+    dayDiv.style.cssText = 'border-bottom:1px solid #F0EDE6;';
+
+    // Day label row
+    const dayHeader = document.createElement('div');
+    dayHeader.style.cssText = 'padding:7px 14px 3px;background:#FDFCFA;border-bottom:1px solid #F0EDE6;display:flex;align-items:center;';
+    const dayName = document.createElement('span');
+    dayName.style.cssText = 'font-size:11.5px;font-weight:600;color:#4A4844;';
+    dayName.textContent = day.date;
+    dayHeader.appendChild(dayName);
+
+    if (day.closed) {
+      const closedBadge = document.createElement('span');
+      closedBadge.style.cssText = 'margin-left:10px;font-size:10.5px;color:#9A9690;font-style:italic;background:#F0EDE6;padding:2px 8px;border-radius:3px;';
+      closedBadge.textContent = day.noHoliday ? 'Closed — no holiday pay' : 'Closed — holiday pay';
+      dayHeader.appendChild(closedBadge);
+      dayDiv.appendChild(dayHeader);
+      container.appendChild(dayDiv);
+      continue;
+    }
+
+    dayDiv.appendChild(dayHeader);
+
+    // Check if all off
+    const allOff = AGENTS.every(a => !day.shifts[a]);
+    if (allOff) {
+      const offDiv = document.createElement('div');
+      offDiv.style.cssText = 'padding:8px 14px;font-size:11.5px;color:#C0BBB0;font-style:italic;';
+      offDiv.textContent = 'No shifts scheduled';
+      dayDiv.appendChild(offDiv);
+      container.appendChild(dayDiv);
+      continue;
+    }
+
+    // Agent bars
+    const barsDiv = document.createElement('div');
+    barsDiv.style.cssText = 'padding:6px 14px 4px 0;';
+
+    for (const agent of AGENTS) {
+      const shift = day.shifts[agent];
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;padding:2px 0;';
+
+      const nameEl = document.createElement('div');
+      nameEl.style.cssText = `width:${AGENT_NAME_WIDTH}px;flex-shrink:0;font-size:10.5px;font-weight:500;color:${shift ? '#4A4844' : '#C0BBB0'};text-align:right;padding-right:10px;`;
+      nameEl.textContent = agent;
+      row.appendChild(nameEl);
+
+      const track = document.createElement('div');
+      track.style.cssText = 'flex:1;position:relative;height:22px;background:#F7F5F0;border-radius:3px;margin-right:14px;overflow:hidden;';
+
+      // Grid lines
+      const grid = document.createElement('div');
+      grid.style.cssText = `position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;`;
+      for (let h = START_HOUR; h <= END_HOUR; h += 2) {
+        const line = document.createElement('div');
+        line.style.cssText = `position:absolute;top:0;bottom:0;left:${pct(h)}%;width:1px;background:#E8E4DA;`;
+        grid.appendChild(line);
+      }
+      track.appendChild(grid);
+
+      if (shift) {
+        const color = COLORS[agent];
+        const bar = document.createElement('div');
+        const left = pct(shift[0]);
+        const width = pct(shift[1]) - pct(shift[0]);
+        bar.style.cssText = `position:absolute;top:2px;bottom:2px;left:${left}%;width:${width}%;background:${color.bg};color:${color.fg};border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:600;white-space:nowrap;overflow:hidden;`;
+        bar.textContent = `${fmtHour(shift[0])}–${fmtHour(shift[1])}`;
+        track.appendChild(bar);
+      }
+
+      row.appendChild(track);
+      barsDiv.appendChild(row);
+    }
+
+    // Coverage row
+    const covRow = document.createElement('div');
+    covRow.style.cssText = 'display:flex;align-items:center;padding:3px 0 2px;border-top:1px dashed #E8E4DA;margin-top:2px;';
+
+    const covLabel = document.createElement('div');
+    covLabel.style.cssText = `width:${AGENT_NAME_WIDTH}px;flex-shrink:0;font-size:9px;font-weight:700;color:#B0AB9E;text-align:right;padding-right:10px;text-transform:uppercase;letter-spacing:0.04em;`;
+    covLabel.textContent = 'Coverage';
+    covRow.appendChild(covLabel);
+
+    const covTrack = document.createElement('div');
+    covTrack.style.cssText = 'flex:1;position:relative;height:14px;margin-right:14px;';
+
+    const segs = buildCoverageSegments(day.shifts);
+    for (const seg of segs) {
+      const c = covColor(seg.count);
+      const seg_el = document.createElement('div');
+      const left = pct(seg.start);
+      const width = pct(seg.end) - pct(seg.start);
+      seg_el.style.cssText = `position:absolute;top:0;bottom:0;left:${left}%;width:${width}%;background:${c.bg};color:${c.fg};border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;`;
+      if (width > 3) seg_el.textContent = seg.count;
+      covTrack.appendChild(seg_el);
+    }
+    covRow.appendChild(covTrack);
+    barsDiv.appendChild(covRow);
+
+    dayDiv.appendChild(barsDiv);
+    container.appendChild(dayDiv);
+  }
+}
+
+function showWeek(n) {
+  document.querySelectorAll('.week-view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.week-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('week' + n).classList.add('active');
+  document.querySelectorAll('.week-btn')[n-1].classList.add('active');
+}
+
+// Build both timelines
+buildTimeline('timeline1', WEEK1);
+buildTimeline('timeline2', WEEK2);
+</script>
+</body>
+</html>

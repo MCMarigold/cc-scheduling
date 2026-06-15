@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Care Shift Schedule — June 22 – July 5, 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #F7F5F0;
+    color: #2C2A27;
+    padding: 2rem 1.5rem 3rem;
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #D39715;
+    padding-bottom: 1rem;
+  }
+  .header-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #D39715;
+    margin-bottom: 6px;
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #2C2A27;
+    margin-bottom: 4px;
+  }
+  .header-sub {
+    font-size: 13px;
+    color: #6B6860;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-bottom: 1.5rem;
+    align-items: center;
+  }
+  .legend-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6B6860;
+    margin-right: 4px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #4A4844;
+  }
+  .legend-pill {
+    width: 28px;
+    height: 14px;
+    border-radius: 3px;
+  }
+
+  /* Week section */
+  .week-section { margin-bottom: 2rem; }
+  .week-heading {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #D39715;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .week-heading::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #E8E4DA;
+  }
+
+  /* Schedule table */
+  .schedule-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #E0DBD0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .schedule-table th {
+    background: #F7F5F0;
+    font-size: 11px;
+    font-weight: 600;
+    color: #6B6860;
+    text-align: center;
+    padding: 8px 4px;
+    border-bottom: 1px solid #E0DBD0;
+    border-right: 1px solid #E8E4DA;
+    letter-spacing: 0.03em;
+  }
+  .schedule-table th.agent-head {
+    text-align: left;
+    padding-left: 14px;
+    width: 90px;
+    border-right: 1px solid #D0CBBf;
+  }
+  .schedule-table th:last-child { border-right: none; }
+
+  .schedule-table td {
+    padding: 5px 4px;
+    border-bottom: 1px solid #F0EDE6;
+    border-right: 1px solid #F0EDE6;
+    text-align: center;
+    vertical-align: middle;
+    min-width: 0;
+  }
+  .schedule-table td.agent-cell {
+    text-align: left;
+    padding-left: 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #4A4844;
+    background: #FDFCFA;
+    border-right: 1px solid #D0CBBf;
+    white-space: nowrap;
+  }
+  .schedule-table tr:last-child td { border-bottom: none; }
+  .schedule-table td:last-child { border-right: none; }
+
+  /* Shift pills */
+  .pill {
+    display: inline-block;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 10.5px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  .pill-maggie  { background: #DBEAF7; color: #0D4A7A; }
+  .pill-sara    { background: #DAF0E3; color: #1A5C35; }
+  .pill-alicia  { background: #EAE8FC; color: #3A2F9E; }
+  .pill-megan   { background: #FEF0D6; color: #7A4A08; }
+  .pill-monique { background: #EDECEA; color: #4A4844; }
+  .pill-closed  { background: #F0EDE6; color: #9A9690; font-style: italic; }
+  .pill-out     { background: #FDE8E8; color: #8B2020; }
+  .pill-deb     { background: #FFE8CC; color: #7A3800; }
+  .pill-modified { outline: 2px solid currentColor; outline-offset: 1px; }
+
+  .off-dash { color: #D0CBBf; font-size: 14px; }
+
+  /* Notes */
+  .notes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 1.5rem;
+  }
+  .note-card {
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .note-card strong { font-weight: 600; display: block; margin-bottom: 2px; }
+  .note-warn  { background: #FEF7E6; border: 1px solid #F5D98A; color: #7A4A08; }
+  .note-good  { background: #E8F6ED; border: 1px solid #86D0A3; color: #1A5C35; }
+  .note-info  { background: #E8F0FB; border: 1px solid #9DC4F0; color: #0D4A7A; }
+
+  /* Hours table */
+  .hours-section { margin-top: 2rem; }
+  .hours-heading {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #D39715;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hours-heading::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #E8E4DA;
+  }
+  .hours-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #E0DBD0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+    font-size: 12.5px;
+  }
+  .hours-table th {
+    background: #F7F5F0;
+    font-size: 11px;
+    font-weight: 600;
+    color: #6B6860;
+    padding: 8px 14px;
+    text-align: left;
+    border-bottom: 1px solid #E0DBD0;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .hours-table th.num { text-align: right; }
+  .hours-table td {
+    padding: 7px 14px;
+    border-bottom: 1px solid #F0EDE6;
+    color: #2C2A27;
+  }
+  .hours-table td.num { text-align: right; font-weight: 600; }
+  .hours-table td.muted { color: #6B6860; font-size: 11.5px; }
+  .hours-table tr:last-child td { border-bottom: none; }
+  .hours-table tr.total-row td {
+    background: #F7F5F0;
+    font-weight: 600;
+    border-top: 1px solid #E0DBD0;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 2rem;
+    font-size: 11px;
+    color: #9A9690;
+    border-top: 1px solid #E8E4DA;
+    padding-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  @media print {
+    body { background: #fff; padding: 1rem; }
+    .note-warn, .note-good, .note-info { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .pill { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-eyebrow">Marigold Home Inspections — Client Care</div>
+    <h1>Shift Schedule — June 22 – July 5, 2026</h1>
+    <div class="header-sub">Deb Pulskamp working Mon–Tue 6/22–23, out Wed 6/24 (surgery) &nbsp;·&nbsp; Closed Fri July 3 (8 hrs holiday pay) & Sat July 4 (no holiday pay) &nbsp;·&nbsp; Maggie on partial vacation June 29–July 2</div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <span class="legend-label">Key</span>
+    <div class="legend-item"><div class="legend-pill" style="background:#DBEAF7;border:1px solid #9DC4F0;"></div>Maggie</div>
+    <div class="legend-item"><div class="legend-pill" style="background:#DAF0E3;border:1px solid #86D0A3;"></div>Sara</div>
+    <div class="legend-item"><div class="legend-pill" style="background:#EAE8FC;border:1px solid #B8B2F5;"></div>Alicia</div>
+    <div class="legend-item"><div class="legend-pill" style="background:#FEF0D6;border:1px solid #F5D98A;"></div>Megan</div>
+    <div class="legend-item"><div class="legend-pill" style="background:#EDECEA;border:1px solid #C8C5BE;"></div>Monique</div>
+    <div class="legend-item"><div class="legend-pill" style="background:#FDE8E8;border:1px solid #F5B8B8;"></div>Deb (out)</div>
+    <div class="legend-item"><div class="legend-pill" style="background:#FFE8CC;border:1px solid #F5C890;"></div>Deb (working)</div>
+    <div class="legend-item"><div class="legend-pill" style="background:#F0EDE6;border:1px solid #D0CBBf;"></div>Closed</div>
+    <div class="legend-item" style="margin-left:4px;">
+      <div style="width:28px;height:14px;border-radius:3px;background:#DBEAF7;outline:2px solid #0D4A7A;outline-offset:1px;"></div>
+      Modified shift
+    </div>
+  </div>
+
+  <!-- Week 1 -->
+  <div class="week-section">
+    <div class="week-heading">Week 1 — June 22–28</div>
+    <table class="schedule-table">
+      <thead>
+        <tr>
+          <th class="agent-head">Agent</th>
+          <th>Mon 6/22</th>
+          <th>Tue 6/23</th>
+          <th>Wed 6/24</th>
+          <th>Thu 6/25</th>
+          <th>Fri 6/26</th>
+          <th>Sat 6/27</th>
+          <th>Sun 6/28</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="agent-cell">Maggie</td>
+          <td><span class="pill pill-maggie">7a–3p</span></td>
+          <td><span class="pill pill-maggie">7a–3p</span></td>
+          <td><span class="pill pill-maggie">7a–3p</span></td>
+          <td><span class="pill pill-maggie">7a–3p</span></td>
+          <td><span class="pill pill-maggie">7a–3p</span></td>
+          <td><span class="off-dash">—</span></td>
+          <td><span class="off-dash">—</span></td>
+        </tr>
+        <tr>
+          <td class="agent-cell">Sara</td>
+          <td><span class="pill pill-sara">8a–6p</span></td>
+          <td><span class="off-dash">—</span></td>
+          <td><span class="off-dash">—</span></td>
+          <td><span class="off-dash">—</span></td>
+          <td><span class="pill pill-sara">8a–6p</span></td>
+          <td><span class="pill pill-sara">9a–7p</span></td>
+          <td><span class="pill pill-sara">9a–7p</span></td>
+        </tr>
+        <tr>
+          <td class="agent-cell">Alicia</td>
+          <td><span class="pill pill-alicia">11a–7p</span></td>
+          <td><span class="pill pill-alicia">11a–7p</span></td>
+          <td><span class="pill pill-alicia">11a–7p</span></td>
+          <td><span class="pill pill-alicia">11a–7p</span></td>
+          <td><span class="pill pill-alicia">11a–7p</span></td>
+          <td><span class="off-dash">—</span></td>
+          <td><span class="off-dash">—</span></td>
+        </tr>
+        <tr>
+          <td class="agent-cell">Megan</td>
+          <td><span class="pill pill-megan">8a–12p</span></td>
+          <td><span class="pill pill-megan">8a–12p</span></td>
+          <td><span class="pill pill-megan">8a–12p</span></td>
+          <td><span class="pill pill-megan">8a–12p</span></td>
+          <td><span class="pill pill-megan">8a–12p</span></td>
+          <td><span class="off-dash">—</span></td>
+          <td><span class="off-dash">—</span></td>
+        </tr>
+        <tr>
+          <td class="agent-cell">Monique</td>
+          <td><span class="pill pill-monique">6p–2a</span></td>
+          <td><span class="pill pill-monique">6p–2a</span></td>
+          <td><span class="pill pill-monique">6p–2a</span></td>
+          <td><span class="pill pill-monique">6p–2a</span></td>
+          <td><span class="off-dash">—</span></td>
+          <td><span class="off-dash">—</span></td>
+          <td><span class="pill pill-monique">6p–2a</span></td>
+        </tr>
+        <tr>
+          <td class="agent-cell">Deb</td>
+          <td><span class="pill pill-deb">9a–5p</span></td>
+          <td><span class="pill pill-deb">9a–5p</span></td>
+          <td><span class="pill pill-out">Out</span></td>
+          <td><span class="pill pill-out">Out</span></td>
+          <td><span class="pill pill-out">Out</span></td>
+          <td><span class="off-dash">—</span></td>
+          <td><span class="off-dash">—</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Week 2 -->
+  <div class="week-section">
+    <div class="week-heading">Week 2 — June 29 – July 5</div>
+    <table class="schedule-table">
+      <thead>
+        <tr>
+          <th class="agent-head">Agent</th>
+          <th>Mon 6/29</th>
+          <th>Tue 6/30</th>
+          <th>Wed 7/1</th>
+          <th>Thu 7/2</th>
+          <th>Fri 7/3 ✦</th>
+          <th>Sat 7/4 ✦</th>
+          <th>Sun 7/5</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="agent-cell">Maggie</td>
+          <td><span class="off-dash">Off</span></td>
+          <td><span class="pill pill-maggie pill-modified">7a–11a</span></td>
+          <td><span class="pill pill-maggie pill-modified">7a–11a</span></td>
+          <td><span class="pill pill-maggie pill-modified">7a–11a</span></td>
+          <td><span class="pill pill-closed">Closed</span></td>
+          <td><span class="pill pill-closed">Closed</span></td>
+          <td><span class="off-dash">—</span></td>
+        </tr>
+        <tr>
+          <td class="agent-cell">Sara</td>
+          <td><span class="pill pill-sara">8a–6p</span></td>
+          <td><span class="pill pill-sara pill-modified">8a–2p</span></td>
+          <td><span class="pill pill-sara pill-modified">8a–2p</span></td>
+          <td><span class="off-dash">—</span></td>
+          <td><span class="pill pill-closed">Closed</span></td>
+          <td><span class="pill pill-closed">Closed</span></td>
+          <td><span class="pill pill-sara">9a–7p</span></td>
+        </tr>
+        <tr>
+          <td class="agent-cell">Alicia</td>
+          <td><span class="pill pill-alicia">11a–7p</span></td>
+          <td><span class="pill pill-alicia">11a–7p</span></td>
+          <td><span class="pill pill-alicia">11a–7p</span></td>
+          <td><span class="pill pill-alicia">11a–7p</span></td>
+          <td><span class="pill pill-closed">Closed</span></td>
+          <td><span class="pill pill-closed">Closed</span></td>
+          <td><span class="off-dash">—</span></td>
+        </tr>
+        <tr>
+          <td class="agent-cell">Megan</td>
+          <td><span class="pill pill-megan pill-modified">7a–11a</span></td>
+          <td><span class="pill pill-megan">8a–12p</span></td>
+          <td><span class="pill pill-megan">8a–12p</span></td>
+          <td><span class="pill pill-megan">8a–12p</span></td>
+          <td><span class="pill pill-closed">Closed</span></td>
+          <td><span class="pill pill-closed">Closed</span></td>
+          <td><span class="off-dash">—</span></td>
+        </tr>
+        <tr>
+          <td class="agent-cell">Monique</td>
+          <td><span class="pill pill-monique">6p–2a</span></td>
+          <td><span class="pill pill-monique">6p–2a</span></td>
+          <td><span class="pill pill-monique">6p–2a</span></td>
+          <td><span class="pill pill-monique">6p–2a</span></td>
+          <td><span class="pill pill-closed">Closed</span></td>
+          <td><span class="pill pill-closed">Closed</span></td>
+          <td><span class="pill pill-monique">6p–2a</span></td>
+        </tr>
+        <tr>
+          <td class="agent-cell">Deb</td>
+          <td><span class="pill pill-out">Out</span></td>
+          <td><span class="pill pill-out">Out</span></td>
+          <td><span class="pill pill-out">Out</span></td>
+          <td><span class="pill pill-out">Out</span></td>
+          <td><span class="pill pill-closed">Closed</span></td>
+          <td><span class="pill pill-closed">Closed</span></td>
+          <td><span class="off-dash">—</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="font-size:11px;color:#9A9690;margin-top:6px;">✦ Closed Fri July 3 (8 hrs holiday pay all staff) & Sat July 4 (no additional holiday pay). &nbsp;Outlined pills = modified shift.</div>
+  </div>
+
+  <!-- Coverage notes -->
+  <div class="notes-grid">
+    <div class="note-card note-good">
+      <strong>Mon 6/29 — team handles it</strong>
+      Sara 8a–6p + Megan 8a–12p + Alicia 11a–7p covers the full day without Maggie. Heads up to Sara on the 8–11am window — historically high volume on Mondays.
+    </div>
+    <div class="note-card note-good">
+      <strong>Tue 6/30 & Wed 7/1 — morning well covered</strong>
+      Maggie 7–11a + Sara 8a–2p + Megan 8a–12p = solid triple coverage in the peak morning window. Sara and Alicia carry the afternoon.
+    </div>
+    <div class="note-card note-warn">
+      <strong>Thu 7/2 — lightest day of the two weeks</strong>
+      Maggie off at 11am, no Sara. Alicia is solo noon–7pm. Worth a check-in beforehand — this is her most vulnerable window given her known answer rate pattern.
+    </div>
+    <div class="note-card note-info">
+      <strong>Wed–Fri week 1 & all of week 2 — no Deb</strong>
+      Deb is in Mon/Tue 6/22–23 before her surgery. From Wed 6/24 onward she's out. Tue–Thu of week 2 are the biggest sustained gap — monitor call answer rates and flag early if volume spikes.
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span>Marigold Home Inspections — Client Care &nbsp;·&nbsp; Prepared by Maggie Cox</span>
+    <span>June 2026</span>
+  </div>
+
+</div>
+</body>
+</html>
